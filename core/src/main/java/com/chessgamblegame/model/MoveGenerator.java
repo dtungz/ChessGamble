@@ -33,6 +33,24 @@ public class MoveGenerator
         };
     }
 
+    public static List<Position> enemyMoves(Board board, Piece enemy)
+    {
+        return enemyMoves(board, enemy.type, enemy.pos);
+    }
+
+    public static List<Position> enemyMoves(Board board, PieceType type, Position from)
+    {
+        return switch (type)
+        {
+            case Knight -> enemyKnightMoves(board, from);
+            case Rook -> enemySlide(board, from, ORTHOGONAL);
+            case Bishop -> enemySlide(board, from, DIAGONAL);
+            case Queen -> enemySlide(board, from, ALL_DIRECTIONS);
+            case Pawn -> enemyPawnMoves(board, from);
+            case King -> throw new IllegalArgumentException("Địch không có Vua");
+        };
+    }
+
     private static List<Position> kingTeleport(Position from)
     {
         List<Position> moves = new ArrayList<>();
@@ -98,6 +116,59 @@ public class MoveGenerator
         {
             Position diagonal = new Position(from.x() + dx, from.y() + 1);
             if (diagonal.inBounds() && board.getEnemyAt(diagonal) != null)
+            {
+                moves.add(diagonal);
+            }
+        }
+        return moves;
+    }
+
+    private static List<Position> enemyKnightMoves(Board board, Position from)
+    {
+        List<Position> moves = new ArrayList<>();
+        for (Position p : knightMoves(from))
+        {
+            if (board.getEnemyAt(p) == null)
+            {
+                moves.add(p);
+            }
+        }
+        return moves;
+    }
+
+    private static List<Position> enemySlide(Board board, Position from, int[][] directions)
+    {
+        List<Position> moves = new ArrayList<>();
+        for (int[] d : directions)
+        {
+            Position p = new Position(from.x() + d[0], from.y() + d[1]);
+            while (p.inBounds() && board.getEnemyAt(p) == null)
+            {
+                moves.add(p);
+                if (p.equals(board.playerPos))
+                {
+                    break;
+                }
+                p = new Position(p.x() + d[0], p.y() + d[1]);
+            }
+        }
+        return moves;
+    }
+
+    private static List<Position> enemyPawnMoves(Board board, Position from)
+    {
+        List<Position> moves = new ArrayList<>();
+
+        Position forward = new Position(from.x(), from.y() - 1);
+        if (forward.inBounds() && board.isEmpty(forward))
+        {
+            moves.add(forward);
+        }
+
+        for (int dx : new int[]{-1, 1})
+        {
+            Position diagonal = new Position(from.x() + dx, from.y() - 1);
+            if (diagonal.equals(board.playerPos))
             {
                 moves.add(diagonal);
             }
