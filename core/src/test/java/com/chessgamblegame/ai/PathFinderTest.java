@@ -170,38 +170,50 @@ class PathFinderTest
         }
     }
 
-    // Không có đường
+    // Không có đường -> fallback: đi tới ô gần người chơi nhất
 
     @Test
-    void bishopCannotReachPlayerOnOtherColor()
+    void bishopOnOtherColorMovesNextToPlayer()
     {
         playerAt("b1");
         Piece bishop = addEnemy(PieceType.Bishop, "a1");
 
         assertNull(PathFinder.shortestPath(board, bishop));
-        assertNull(PathFinder.nextStep(board, bishop));
+        assertEquals(at("b2"), PathFinder.nextStep(board, bishop));
     }
 
     @Test
-    void pawnBelowPlayerCannotReachIt()
+    void fallbackPicksSquareClosestToPlayer()
+    {
+        playerAt("e5");
+        Piece bishop = addEnemy(PieceType.Bishop, "a8");
+
+        assertNull(PathFinder.shortestPath(board, bishop));
+        assertEquals(at("d5"), PathFinder.nextStep(board, bishop));
+    }
+
+    @Test
+    void pawnBelowPlayerKeepsWalkingDown()
     {
         playerAt("d6");
         Piece pawn = addEnemy(PieceType.Pawn, "d3");
 
-        assertNull(PathFinder.nextStep(board, pawn));
+        assertNull(PathFinder.shortestPath(board, pawn));
+        assertEquals(at("d2"), PathFinder.nextStep(board, pawn));
     }
 
     @Test
-    void pawnInSameColumnAsPlayerCannotReachIt()
+    void pawnInSameColumnAsPlayerKeepsWalkingDown()
     {
         playerAt("d2");
         Piece pawn = addEnemy(PieceType.Pawn, "d7");
 
-        assertNull(PathFinder.nextStep(board, pawn));
+        assertNull(PathFinder.shortestPath(board, pawn));
+        assertEquals(at("d6"), PathFinder.nextStep(board, pawn));
     }
 
     @Test
-    void blockedPawnHasNoPath()
+    void blockedPawnStaysStill()
     {
         playerAt("e5");
         Piece pawn = addEnemy(PieceType.Pawn, "d7");
@@ -211,7 +223,16 @@ class PathFinderTest
     }
 
     @Test
-    void surroundedQueenHasNoPath()
+    void pawnOnBottomRowStaysStill()
+    {
+        playerAt("h8");
+        Piece pawn = addEnemy(PieceType.Pawn, "a1");
+
+        assertNull(PathFinder.nextStep(board, pawn));
+    }
+
+    @Test
+    void surroundedQueenStaysStill()
     {
         playerAt("h1");
         Piece queen = addEnemy(PieceType.Queen, "a8");
@@ -220,6 +241,16 @@ class PathFinderTest
         addEnemy(PieceType.Pawn, "b8");
 
         assertNull(PathFinder.nextStep(board, queen));
+    }
+
+    @Test
+    void fallbackNeverLandsOnAnotherEnemy()
+    {
+        playerAt("b1");
+        Piece bishop = addEnemy(PieceType.Bishop, "a1");
+        addEnemy(PieceType.Pawn, "b2");
+
+        assertNull(PathFinder.nextStep(board, bishop));
     }
 
     // Khoảng cách tới người chơi
@@ -303,8 +334,15 @@ class PathFinderTest
                     int d = PathFinder.distanceToPlayer(board, e);
                     Position step = PathFinder.nextStep(board, e);
 
-                    assertEquals(d == -1, step == null, type + " tại " + from.toNotation());
-                    assertEquals(d == 1, board.playerPos.equals(step), type + " tại " + from.toNotation());
+                    String where = type + " tại " + from.toNotation();
+                    boolean hasMoves = !MoveGenerator.enemyMoves(board, e).isEmpty();
+
+                    assertEquals(hasMoves, step != null, where);
+                    assertEquals(d == 1, board.playerPos.equals(step), where);
+                    if (step != null)
+                    {
+                        assertTrue(MoveGenerator.enemyMoves(board, e).contains(step), where);
+                    }
                     board.removeEnemy(e);
                 }
             }
