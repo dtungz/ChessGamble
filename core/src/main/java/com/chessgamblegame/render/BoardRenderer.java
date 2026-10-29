@@ -1,76 +1,91 @@
 package com.chessgamblegame.render;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.chessgamblegame.ChessGambleGame;
 import com.chessgamblegame.model.Board;
 import com.chessgamblegame.model.Position;
 
 import java.util.List;
 
-// Vẽ bàn cờ 8x8 và đổi qua lại giữa toạ độ màn hình và ô cờ.
+// Vẽ bàn cờ 8x8 kiểu pixel và đổi qua lại giữa toạ độ màn hình và ô cờ.
 // Gốc toạ độ libGDX ở góc dưới-trái, khớp với quy ước model (a1 = góc dưới-trái).
 public class BoardRenderer
 {
-    public static final float BOARD_X = 40;
-    public static final float BOARD_Y = 40;
-    public static final float CELL = 80;
+    public static final float CELL = 72;
     public static final float BOARD_SIZE = CELL * Board.SIZE;
+    public static final float BOARD_X = (ChessGambleGame.WORLD_WIDTH - BOARD_SIZE) / 2;
+    public static final float BOARD_Y = 72;
 
-    private static final Color LIGHT = Color.valueOf("F0D9B5");
-    private static final Color DARK = Color.valueOf("B58863");
-    private static final Color LABEL = Color.valueOf("C8C8D0");
-    private static final Color MOVE_HINT = new Color(0f, 0.78f, 0f, 0.40f);
-    private static final Color CAPTURE_HINT = new Color(0.86f, 0f, 0f, 0.45f);
+    private static final float FRAME = 6;
+    private static final float MOVE_DOT = 14;
+    private static final float CAPTURE_FRAME = 5;
 
-    private final GlyphLayout layout = new GlyphLayout();
+    private static final Color MOVE_HINT = Palette.withAlpha(Palette.BORDER, 0.85f);
+    private static final float HOVER_FRAME = 4;
+    private static final Color HOVER_FILL = Palette.withAlpha(Palette.OUTLINE, 0.18f);
 
-    // Gọi giữa shapes.begin(Filled) và shapes.end()
+    // Viền tối quanh bàn cờ + dải gạch đứt dưới đáy. Gọi giữa shapes.begin(Filled) và shapes.end()
+    public void drawFrame(ShapeRenderer shapes)
+    {
+        shapes.setColor(Palette.OUTLINE);
+        shapes.rect(BOARD_X - FRAME, BOARD_Y - FRAME, BOARD_SIZE + 2 * FRAME, BOARD_SIZE + 2 * FRAME);
+        shapes.setColor(Palette.BORDER);
+        for (float x = BOARD_X; x < BOARD_X + BOARD_SIZE; x += 24)
+        {
+            shapes.rect(x, BOARD_Y - FRAME - 8, 14, 4);
+        }
+    }
+
     public void drawSquares(ShapeRenderer shapes)
     {
         for (int x = 0; x < Board.SIZE; x++)
         {
             for (int y = 0; y < Board.SIZE; y++)
             {
-                shapes.setColor((x + y) % 2 == 0 ? DARK : LIGHT);   // a1 là ô tối
+                shapes.setColor((x + y) % 2 == 0 ? Palette.DARK_SQUARE : Palette.LIGHT_SQUARE);   // a1 là ô tối
                 shapes.rect(cellX(x), cellY(y), CELL, CELL);
             }
         }
     }
 
-    // Tô 1 ô bằng màu bán trong suốt (cần bật blending trước khi gọi).
-    public void highlight(ShapeRenderer shapes, Position p, Color color)
-    {
-        shapes.setColor(color);
-        shapes.rect(cellX(p.x()), cellY(p.y()), CELL, CELL);
-    }
-
-    // Ô đi được tô xanh, ô có địch (ăn được) tô đỏ. Cần bật blending trước khi gọi.
-    public void drawMoveHints(ShapeRenderer shapes, Board board, List<Position> moves)
+    // Ô đi được: chấm vuông nhỏ ở giữa (bỏ chấm nếu dots = false). Ô ăn được: khung đỏ quanh ô.
+    public void drawMoveHints(ShapeRenderer shapes, Board board, List<Position> moves, boolean dots)
     {
         for (Position p : moves)
         {
-            highlight(shapes, p, board.getEnemyAt(p) != null ? CAPTURE_HINT : MOVE_HINT);
+            float x = cellX(p.x());
+            float y = cellY(p.y());
+            if (board.getEnemyAt(p) != null)
+            {
+                drawFrame(shapes, x, y, CAPTURE_FRAME, Palette.ACCENT);
+            }
+            else if (dots)
+            {
+                shapes.setColor(MOVE_HINT);
+                shapes.rect(x + (CELL - MOVE_DOT) / 2, y + (CELL - MOVE_DOT) / 2, MOVE_DOT, MOVE_DOT);
+            }
         }
     }
 
-    // Chữ a–h dưới bàn cờ và 1–8 bên trái. Gọi giữa batch.begin() và batch.end()
-    public void drawLabels(SpriteBatch batch, BitmapFont font)
+    // Ô đi được đang rê chuột: phủ mờ + khung tối, để biết bấm vào sẽ đi tới đâu.
+    public void drawHover(ShapeRenderer shapes, Position p)
     {
-        font.setColor(LABEL);
-        for (int i = 0; i < Board.SIZE; i++)
-        {
-            String file = String.valueOf((char) ('a' + i));
-            layout.setText(font, file);
-            font.draw(batch, file, cellX(i) + (CELL - layout.width) / 2, BOARD_Y - 12);
+        float x = cellX(p.x());
+        float y = cellY(p.y());
+        shapes.setColor(HOVER_FILL);
+        shapes.rect(x, y, CELL, CELL);
+        drawFrame(shapes, x, y, HOVER_FRAME, Palette.OUTLINE);
+    }
 
-            String rank = String.valueOf(i + 1);
-            layout.setText(font, rank);
-            font.draw(batch, rank, BOARD_X - 12 - layout.width, cellY(i) + (CELL + layout.height) / 2);
-        }
+    public static void drawFrame(ShapeRenderer shapes, float x, float y, float thickness, Color color)
+    {
+        shapes.setColor(color);
+        shapes.rect(x, y, CELL, thickness);
+        shapes.rect(x, y + CELL - thickness, CELL, thickness);
+        shapes.rect(x, y, thickness, CELL);
+        shapes.rect(x + CELL - thickness, y, thickness, CELL);
     }
 
     public static float cellX(int x)
@@ -81,6 +96,16 @@ public class BoardRenderer
     public static float cellY(int y)
     {
         return BOARD_Y + y * CELL;
+    }
+
+    public static float centerX(Position p)
+    {
+        return cellX(p.x()) + CELL / 2;
+    }
+
+    public static float centerY(Position p)
+    {
+        return cellY(p.y()) + CELL / 2;
     }
 
     // Toạ độ thế giới (đã qua viewport) -> ô cờ; null nếu nằm ngoài bàn.

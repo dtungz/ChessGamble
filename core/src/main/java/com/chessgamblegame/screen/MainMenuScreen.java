@@ -12,9 +12,9 @@ public class MainMenuScreen extends BaseScreen
     private static final float BUTTON_HEIGHT = 60;
     private static final float BUTTON_X = (ChessGambleGame.WORLD_WIDTH - BUTTON_WIDTH) / 2;
 
-    private final UiButton levelButton = new UiButton("Level mode", BUTTON_X, 380, BUTTON_WIDTH, BUTTON_HEIGHT);
-    private final UiButton endlessButton = new UiButton("Endless mode", BUTTON_X, 295, BUTTON_WIDTH, BUTTON_HEIGHT);
-    private final UiButton quitButton = new UiButton("Quit", BUTTON_X, 210, BUTTON_WIDTH, BUTTON_HEIGHT);
+    private final UiButton levelButton = new UiButton("LEVEL MODE", BUTTON_X, 380, BUTTON_WIDTH, BUTTON_HEIGHT);
+    private final UiButton endlessButton = new UiButton("ENDLESS MODE", BUTTON_X, 295, BUTTON_WIDTH, BUTTON_HEIGHT);
+    private final UiButton quitButton = new UiButton("QUIT", BUTTON_X, 210, BUTTON_WIDTH, BUTTON_HEIGHT);
 
     public MainMenuScreen(ChessGambleGame game)
     {
@@ -50,8 +50,8 @@ public class MainMenuScreen extends BaseScreen
         shapes.end();
 
         batch.begin();
-        drawCentered(titleFont, "ChessGambleGame", 590, TEXT);
-        drawCentered(uiFont, "Roll the dice. Move like that piece. Survive.", 510, DIM_TEXT);
+        drawCentered(titleFont, "CHESSGAMBLEGAME", 590, TEXT);
+        drawCentered(smallFont, "ROLL THE DICE. MOVE LIKE THAT PIECE. SURVIVE.", 520, DIM_TEXT);
         levelButton.drawLabel(batch, uiFont);
         endlessButton.drawLabel(batch, uiFont);
         quitButton.drawLabel(batch, uiFont);

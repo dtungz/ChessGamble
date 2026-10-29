@@ -10,28 +10,34 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.chessgamblegame.ChessGambleGame;
+import com.chessgamblegame.render.Palette;
 
 // Phần chung của mọi màn hình: camera, viewport, bút vẽ, font, vị trí chuột.
 public abstract class BaseScreen extends ScreenAdapter
 {
-    protected static final Color TEXT = Color.valueOf("E6E6EB");
-    protected static final Color DIM_TEXT = Color.valueOf("A0A0AA");
-    protected static final Color WIN_TEXT = Color.valueOf("6EE07A");
-    protected static final Color LOSE_TEXT = Color.valueOf("FF6B6B");
+    protected static final Color TEXT = Palette.TEXT;
+    protected static final Color DIM_TEXT = Palette.DIM_TEXT;
+    protected static final Color WIN_TEXT = Palette.WIN;
+    protected static final Color LOSE_TEXT = Palette.ACCENT;
+
+    private static final String PIXEL_FONT = "fonts/PressStart2P-Regular.ttf";
 
     protected final ChessGambleGame game;
     protected final OrthographicCamera camera = new OrthographicCamera();
     protected final Viewport viewport = new FitViewport(ChessGambleGame.WORLD_WIDTH, ChessGambleGame.WORLD_HEIGHT, camera);
     protected final ShapeRenderer shapes = new ShapeRenderer();
     protected final SpriteBatch batch = new SpriteBatch();
-    protected final BitmapFont uiFont = createFont(1.3f);
-    protected final BitmapFont titleFont = createFont(3f);
+    protected final BitmapFont smallFont = createFont(12);
+    protected final BitmapFont uiFont = createFont(16);
+    protected final BitmapFont titleFont = createFont(32);
     protected final Vector2 mouse = new Vector2();   // vị trí chuột trong toạ độ game
 
     private final GlyphLayout layout = new GlyphLayout();
@@ -45,7 +51,7 @@ public abstract class BaseScreen extends ScreenAdapter
     // Xoá màn hình, áp viewport, bật trong suốt. Gọi đầu mỗi render().
     protected void beginFrame()
     {
-        ScreenUtils.clear(0.12f, 0.12f, 0.15f, 1f);
+        ScreenUtils.clear(Palette.BACKGROUND);
         viewport.apply();
         shapes.setProjectionMatrix(camera.combined);
         batch.setProjectionMatrix(camera.combined);
@@ -77,16 +83,28 @@ public abstract class BaseScreen extends ScreenAdapter
     // Viết chữ căn giữa theo chiều ngang. Gọi giữa batch.begin() và batch.end()
     protected void drawCentered(BitmapFont font, String text, float y, Color color)
     {
-        font.setColor(color);
-        layout.setText(font, text);
-        font.draw(batch, text, (ChessGambleGame.WORLD_WIDTH - layout.width) / 2, y);
+        drawCentered(font, text, ChessGambleGame.WORLD_WIDTH / 2f, y, color);
     }
 
-    protected static BitmapFont createFont(float scale)
+    protected void drawCentered(BitmapFont font, String text, float centerX, float y, Color color)
     {
-        BitmapFont font = new BitmapFont();
-        font.getData().setScale(scale);
-        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        font.setColor(color);
+        layout.setText(font, text);
+        font.draw(batch, text, centerX - layout.width / 2, y);
+    }
+
+    // Font pixel Press Start 2P vẽ ở đúng cỡ chữ (mono + Nearest) để nét chữ vuông vức, không bị mờ.
+    protected static BitmapFont createFont(int size)
+    {
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(PIXEL_FONT));
+        FreeTypeFontParameter param = new FreeTypeFontParameter();
+        param.size = size;
+        param.mono = true;
+        param.minFilter = Texture.TextureFilter.Nearest;
+        param.magFilter = Texture.TextureFilter.Nearest;
+        BitmapFont font = generator.generateFont(param);
+        generator.dispose();
+        font.setUseIntegerPositions(true);
         return font;
     }
 
@@ -113,6 +131,7 @@ public abstract class BaseScreen extends ScreenAdapter
         disposed = true;
         shapes.dispose();
         batch.dispose();
+        smallFont.dispose();
         uiFont.dispose();
         titleFont.dispose();
         disposeExtra();

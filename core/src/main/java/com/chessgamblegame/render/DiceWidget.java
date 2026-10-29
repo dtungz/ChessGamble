@@ -1,6 +1,5 @@
 package com.chessgamblegame.render;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -18,10 +17,8 @@ public class DiceWidget
     private static final float ROLL_TIME = 0.8f;
     private static final float FACE_CHANGE_EVERY = 0.08f;
 
-    private static final Color BORDER = Color.valueOf("F2C14E");
-    private static final Color FILL = Color.valueOf("FAFAFA");
-    private static final Color DISABLED_FILL = Color.valueOf("8A8A92");
-    private static final Color TEXT = Color.valueOf("1A1A1A");
+    private static final float FRAME = 4;
+    private static final float FACE_SIZE = 96;   // ảnh 16px phóng x6
 
     private final Rectangle bounds;
     private final Random rnd = new Random();
@@ -81,29 +78,36 @@ public class DiceWidget
         }
     }
 
-    // canRoll = true thì xúc xắc sáng và có viền vàng để mời người chơi bấm.
-    public void drawShapes(ShapeRenderer shapes, boolean canRoll)
+    // Khung xúc xắc: viền đỏ nhấp nháy khi tới lượt bấm, viền xám khi không bấm được.
+    public void drawShapes(ShapeRenderer shapes, boolean canRoll, float time)
     {
-        if (canRoll)
-        {
-            shapes.setColor(BORDER);
-            shapes.rect(bounds.x - 5, bounds.y - 5, bounds.width + 10, bounds.height + 10);
-        }
-        shapes.setColor(canRoll || isRolling() || shownFace != null ? FILL : DISABLED_FILL);
+        boolean blinkOn = canRoll && (int) (time * 3) % 2 == 0;
+        shapes.setColor(blinkOn ? Palette.ACCENT : Palette.BORDER);
         shapes.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+        shapes.setColor(Palette.PANEL);
+        shapes.rect(bounds.x + FRAME, bounds.y + FRAME, bounds.width - 2 * FRAME, bounds.height - 2 * FRAME);
     }
 
-    public void drawText(SpriteBatch batch, BitmapFont bigFont, BitmapFont smallFont, Color captionColor)
+    // Tên mặt xúc xắc ở trên khung, ảnh quân trắng ở giữa; chưa tung thì hiện dấu "?".
+    public void drawText(SpriteBatch batch, BitmapFont bigFont, BitmapFont labelFont, PieceRenderer pieces)
     {
-        String letter = shownFace == null ? "?" : PieceRenderer.letterOf(shownFace);
-        bigFont.setColor(TEXT);
-        layout.setText(bigFont, letter);
-        bigFont.draw(batch, letter, bounds.x + (bounds.width - layout.width) / 2,
-            bounds.y + (bounds.height + layout.height) / 2);
+        if (shownFace == null)
+        {
+            bigFont.setColor(Palette.TEXT);
+            layout.setText(bigFont, "?");
+            bigFont.draw(batch, "?", Math.round(bounds.x + (bounds.width - layout.width) / 2),
+                Math.round(bounds.y + (bounds.height + layout.height) / 2));
+        }
+        else
+        {
+            batch.draw(pieces.whiteTexture(shownFace), bounds.x + (bounds.width - FACE_SIZE) / 2,
+                bounds.y + (bounds.height - FACE_SIZE) / 2, FACE_SIZE, FACE_SIZE);
+        }
 
-        String caption = shownFace == null ? "Click to roll" : shownFace.name();
-        smallFont.setColor(captionColor);
-        layout.setText(smallFont, caption);
-        smallFont.draw(batch, caption, bounds.x + (bounds.width - layout.width) / 2, bounds.y - 14);
+        String caption = shownFace == null ? "ROLL" : shownFace.name().toUpperCase();
+        labelFont.setColor(Palette.TEXT);
+        layout.setText(labelFont, caption);
+        labelFont.draw(batch, caption, Math.round(bounds.x + (bounds.width - layout.width) / 2),
+            bounds.y + bounds.height + 14 + layout.height);
     }
 }

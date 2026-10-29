@@ -17,7 +17,7 @@ public class LevelSelectScreen extends BaseScreen
     private static final float GRID_TOP = 520;
 
     private final List<UiButton> levelButtons = new ArrayList<>();
-    private final UiButton backButton = new UiButton("Back", 40, 40, 160, 50);
+    private final UiButton backButton = new UiButton("BACK", 40, 40, 160, 50);
 
     public LevelSelectScreen(ChessGambleGame game)
     {
@@ -64,10 +64,10 @@ public class LevelSelectScreen extends BaseScreen
         shapes.end();
 
         batch.begin();
-        drawCentered(titleFont, "Choose a level", 640, TEXT);
+        drawCentered(titleFont, "CHOOSE A LEVEL", 640, TEXT);
         if (levelButtons.isEmpty())
         {
-            drawCentered(uiFont, "No level files found in assets/levels", 400, DIM_TEXT);
+            drawCentered(uiFont, "NO LEVEL FILES FOUND", 400, DIM_TEXT);
         }
         for (UiButton b : levelButtons)
         {

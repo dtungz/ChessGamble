@@ -16,9 +16,9 @@ public class ResultScreen extends BaseScreen
     private final int turns;
     private final int levelNumber;   // 0 = Endless
 
-    private final UiButton againButton = new UiButton("Play again", BUTTON_X, 300, BUTTON_WIDTH, BUTTON_HEIGHT);
-    private final UiButton nextButton = new UiButton("Next level", BUTTON_X, 225, BUTTON_WIDTH, BUTTON_HEIGHT);
-    private final UiButton menuButton = new UiButton("Menu", BUTTON_X, 150, BUTTON_WIDTH, BUTTON_HEIGHT);
+    private final UiButton againButton = new UiButton("PLAY AGAIN", BUTTON_X, 300, BUTTON_WIDTH, BUTTON_HEIGHT);
+    private final UiButton nextButton = new UiButton("NEXT LEVEL", BUTTON_X, 225, BUTTON_WIDTH, BUTTON_HEIGHT);
+    private final UiButton menuButton = new UiButton("MENU", BUTTON_X, 150, BUTTON_WIDTH, BUTTON_HEIGHT);
 
     public ResultScreen(ChessGambleGame game, boolean won, int score, int turns, int levelNumber)
     {
@@ -69,11 +69,11 @@ public class ResultScreen extends BaseScreen
         batch.begin();
         String title = won ? "YOU WIN!" : "GAME OVER";
         drawCentered(titleFont, title, 600, won ? WIN_TEXT : LOSE_TEXT);
-        drawCentered(uiFont, isEndless() ? "Endless mode" : "Level " + levelNumber, 520, DIM_TEXT);
-        drawCentered(uiFont, "Score: " + score + "      Turns: " + turns, 470, TEXT);
+        drawCentered(uiFont, isEndless() ? "ENDLESS MODE" : "LEVEL " + levelNumber, 520, DIM_TEXT);
+        drawCentered(uiFont, "SCORE " + score + "    TURNS " + turns, 470, TEXT);
         if (won && levelNumber > 0 && !nextButton.enabled)
         {
-            drawCentered(uiFont, "That was the last level!", 420, DIM_TEXT);
+            drawCentered(uiFont, "THAT WAS THE LAST LEVEL!", 420, DIM_TEXT);
         }
         againButton.drawLabel(batch, uiFont);
         if (!isEndless())

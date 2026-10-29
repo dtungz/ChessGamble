@@ -1,6 +1,5 @@
 package com.chessgamblegame.render;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -8,14 +7,10 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
-// Nút bấm đơn giản tự vẽ (hình chữ nhật + chữ), sáng lên khi rê chuột vào.
+// Nút bấm kiểu pixel: viền vuông dày, rê chuột vào thì viền chuyển đỏ.
 public class UiButton
 {
-    private static final Color FILL = Color.valueOf("3B6FD8");
-    private static final Color HOVER = Color.valueOf("5A8CF0");
-    private static final Color DISABLED = Color.valueOf("4A4A55");
-    private static final Color TEXT = Color.valueOf("FFFFFF");
-    private static final Color DISABLED_TEXT = Color.valueOf("8A8A92");
+    private static final float BORDER = 3;
 
     public final Rectangle bounds;
     public String label;
@@ -37,23 +32,19 @@ public class UiButton
     // Gọi giữa shapes.begin(Filled) và shapes.end()
     public void drawShape(ShapeRenderer shapes, Vector2 mouse)
     {
-        if (!enabled)
-        {
-            shapes.setColor(DISABLED);
-        }
-        else
-        {
-            shapes.setColor(bounds.contains(mouse) ? HOVER : FILL);
-        }
+        boolean hover = enabled && bounds.contains(mouse);
+        shapes.setColor(!enabled ? Palette.PANEL : hover ? Palette.ACCENT : Palette.BORDER);
         shapes.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+        shapes.setColor(hover ? Palette.BORDER : Palette.PANEL);
+        shapes.rect(bounds.x + BORDER, bounds.y + BORDER, bounds.width - 2 * BORDER, bounds.height - 2 * BORDER);
     }
 
     // Gọi giữa batch.begin() và batch.end()
     public void drawLabel(SpriteBatch batch, BitmapFont font)
     {
-        font.setColor(enabled ? TEXT : DISABLED_TEXT);
+        font.setColor(enabled ? Palette.TEXT : Palette.BORDER);
         layout.setText(font, label);
-        font.draw(batch, label, bounds.x + (bounds.width - layout.width) / 2,
-            bounds.y + (bounds.height + layout.height) / 2);
+        font.draw(batch, label, Math.round(bounds.x + (bounds.width - layout.width) / 2),
+            Math.round(bounds.y + (bounds.height + layout.height) / 2));
     }
 }
