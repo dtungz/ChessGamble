@@ -2,6 +2,7 @@ package com.chessgamblegame.screen;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.chessgamblegame.ChessGambleGame;
+import com.chessgamblegame.render.Palette;
 import com.chessgamblegame.render.UiButton;
 
 import java.util.ArrayList;
@@ -31,8 +32,24 @@ public class LevelSelectScreen extends BaseScreen
             int row = i / COLUMNS;
             float x = startX + col * (CELL_WIDTH + GAP);
             float y = GRID_TOP - CELL_HEIGHT - row * (CELL_HEIGHT + GAP);
-            levelButtons.add(new UiButton(String.valueOf(i + 1), x, y, CELL_WIDTH, CELL_HEIGHT));
+            UiButton b = new UiButton(String.valueOf(i + 1), x, y, CELL_WIDTH, CELL_HEIGHT);
+            b.enabled = SaveData.isUnlocked(i + 1);   // level chưa mở thì không bấm được
+            levelButtons.add(b);
         }
+    }
+
+    // Ổ khoá pixel nhỏ ở góc trên-phải nút level chưa mở.
+    private void drawLock(UiButton b)
+    {
+        float x = b.bounds.x + b.bounds.width - 26;
+        float y = b.bounds.y + b.bounds.height - 30;
+        shapes.setColor(Palette.BORDER);
+        shapes.rect(x, y, 18, 14);            // thân khoá
+        shapes.rect(x + 3, y + 14, 3, 8);     // quai trái
+        shapes.rect(x + 12, y + 14, 3, 8);    // quai phải
+        shapes.rect(x + 3, y + 20, 12, 3);    // quai trên
+        shapes.setColor(Palette.PANEL);
+        shapes.rect(x + 8, y + 4, 2, 5);      // lỗ khoá
     }
 
     @Override
@@ -59,6 +76,10 @@ public class LevelSelectScreen extends BaseScreen
         for (UiButton b : levelButtons)
         {
             b.drawShape(shapes, mouse);
+            if (!b.enabled)
+            {
+                drawLock(b);
+            }
         }
         backButton.drawShape(shapes, mouse);
         shapes.end();
@@ -74,6 +95,7 @@ public class LevelSelectScreen extends BaseScreen
             b.drawLabel(batch, titleFont);
         }
         backButton.drawLabel(batch, uiFont);
+        drawCentered(smallFont, "WIN A LEVEL TO UNLOCK THE NEXT ONE", 150, DIM_TEXT);
         batch.end();
     }
 }

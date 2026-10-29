@@ -9,6 +9,7 @@ public final class SaveData
 {
     private static final String FILE = "chessgamblegame";
     private static final String ENDLESS_HIGH_SCORE = "endlessHighScore";
+    private static final String UNLOCKED_LEVEL = "unlockedLevel";
 
     private SaveData()
     {
@@ -34,6 +35,30 @@ public final class SaveData
         }
         p.putInteger(ENDLESS_HIGH_SCORE, score);
         p.flush();   // flush mới thực sự ghi xuống file
+        return true;
+    }
+
+    // Level cao nhất đã được mở (chơi được). Lần đầu chơi chỉ mở level 1.
+    public static int getUnlockedLevel()
+    {
+        return Math.max(1, prefs().getInteger(UNLOCKED_LEVEL, 1));
+    }
+
+    public static boolean isUnlocked(int level)
+    {
+        return level <= getUnlockedLevel();
+    }
+
+    // Mở khoá tới level này (không bao giờ khoá lại level đã mở). Trả về true nếu vừa mở thêm level mới.
+    public static boolean unlockLevel(int level)
+    {
+        Preferences p = prefs();
+        if (level <= getUnlockedLevel())
+        {
+            return false;
+        }
+        p.putInteger(UNLOCKED_LEVEL, level);
+        p.flush();
         return true;
     }
 }

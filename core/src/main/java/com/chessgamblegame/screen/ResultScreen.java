@@ -17,6 +17,7 @@ public class ResultScreen extends BaseScreen
     private final int levelNumber;   // 0 = Endless
     private final boolean newRecord;
     private final int highScore;
+    private final boolean justUnlocked;
     private float elapsed;
 
     private final UiButton againButton = new UiButton("PLAY AGAIN", BUTTON_X, 300, BUTTON_WIDTH, BUTTON_HEIGHT);
@@ -30,7 +31,11 @@ public class ResultScreen extends BaseScreen
         this.score = score;
         this.turns = turns;
         this.levelNumber = levelNumber;
-        nextButton.enabled = won && levelNumber > 0 && LevelFiles.exists(levelNumber + 1);
+
+        // Thắng level n thì mở khoá level n+1 (nếu có file). Nút "Next level" bấm được khi level kế đã mở.
+        boolean hasNext = levelNumber > 0 && LevelFiles.exists(levelNumber + 1);
+        justUnlocked = won && hasNext && SaveData.unlockLevel(levelNumber + 1);
+        nextButton.enabled = hasNext && SaveData.isUnlocked(levelNumber + 1);
 
         // Endless: ghi điểm ngay khi vào màn kết quả (chỉ 1 lần mỗi ván)
         newRecord = isEndless() && SaveData.submitEndlessScore(score);
@@ -79,9 +84,13 @@ public class ResultScreen extends BaseScreen
         drawCentered(titleFont, title, 600, won ? WIN_TEXT : LOSE_TEXT);
         drawCentered(uiFont, isEndless() ? "ENDLESS MODE" : "LEVEL " + levelNumber, 520, DIM_TEXT);
         drawCentered(uiFont, "SCORE " + score + "    TURNS " + turns, 470, TEXT);
-        if (won && levelNumber > 0 && !nextButton.enabled)
+        if (won && levelNumber > 0 && !LevelFiles.exists(levelNumber + 1))
         {
             drawCentered(uiFont, "THAT WAS THE LAST LEVEL!", 420, DIM_TEXT);
+        }
+        if (justUnlocked)
+        {
+            drawCentered(uiFont, "LEVEL " + (levelNumber + 1) + " UNLOCKED!", 420, WIN_TEXT);
         }
         if (isEndless())
         {
