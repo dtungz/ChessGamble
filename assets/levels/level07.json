@@ -1,0 +1,12 @@
+{
+  "id": 7,
+  "name": "Heavy Cavalry",
+  "playerStart": "e1",
+  "enemiesPerTurn": 2,
+  "enemies": [
+    { "type": "Rook", "pos": "a8" },
+    { "type": "Knight", "pos": "b8" },
+    { "type": "Knight", "pos": "g8" },
+    { "type": "Rook", "pos": "h8" }
+  ]
+}

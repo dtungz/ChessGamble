@@ -1,0 +1,12 @@
+{
+  "id": 8,
+  "name": "Royal Court",
+  "playerStart": "e1",
+  "enemiesPerTurn": 2,
+  "enemies": [
+    { "type": "Rook", "pos": "a8" },
+    { "type": "Queen", "pos": "d8" },
+    { "type": "Bishop", "pos": "f8" },
+    { "type": "Knight", "pos": "g8" }
+  ]
+}

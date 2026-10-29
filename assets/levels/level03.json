@@ -1,0 +1,12 @@
+{
+  "id": 3,
+  "name": "Two Knights",
+  "playerStart": "e1",
+  "enemiesPerTurn": 2,
+  "enemies": [
+    { "type": "Knight", "pos": "b8" },
+    { "type": "Knight", "pos": "g8" },
+    { "type": "Pawn", "pos": "d7" },
+    { "type": "Pawn", "pos": "e7" }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": 9,
+  "name": "Pawn Wall",
+  "playerStart": "e1",
+  "enemiesPerTurn": 3,
+  "enemies": [
+    { "type": "Rook", "pos": "a8" },
+    { "type": "Knight", "pos": "g8" },
+    { "type": "Pawn", "pos": "a7" },
+    { "type": "Pawn", "pos": "b7" },
+    { "type": "Pawn", "pos": "c7" },
+    { "type": "Pawn", "pos": "d7" },
+    { "type": "Pawn", "pos": "e7" },
+    { "type": "Pawn", "pos": "f7" },
+    { "type": "Pawn", "pos": "g7" },
+    { "type": "Pawn", "pos": "h7" }
+  ]
+}
