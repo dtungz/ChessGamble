@@ -16,9 +16,12 @@ public class MainMenuScreen extends BaseScreen
     private final UiButton endlessButton = new UiButton("ENDLESS MODE", BUTTON_X, 295, BUTTON_WIDTH, BUTTON_HEIGHT);
     private final UiButton quitButton = new UiButton("QUIT", BUTTON_X, 210, BUTTON_WIDTH, BUTTON_HEIGHT);
 
+    private final int endlessHighScore;
+
     public MainMenuScreen(ChessGambleGame game)
     {
         super(game);
+        endlessHighScore = SaveData.getEndlessHighScore();
     }
 
     @Override
@@ -55,6 +58,10 @@ public class MainMenuScreen extends BaseScreen
         levelButton.drawLabel(batch, uiFont);
         endlessButton.drawLabel(batch, uiFont);
         quitButton.drawLabel(batch, uiFont);
+        if (endlessHighScore > 0)
+        {
+            drawCentered(smallFont, "ENDLESS BEST: " + endlessHighScore, 175, DIM_TEXT);
+        }
         batch.end();
     }
 }

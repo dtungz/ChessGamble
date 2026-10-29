@@ -15,6 +15,9 @@ public class ResultScreen extends BaseScreen
     private final int score;
     private final int turns;
     private final int levelNumber;   // 0 = Endless
+    private final boolean newRecord;
+    private final int highScore;
+    private float elapsed;
 
     private final UiButton againButton = new UiButton("PLAY AGAIN", BUTTON_X, 300, BUTTON_WIDTH, BUTTON_HEIGHT);
     private final UiButton nextButton = new UiButton("NEXT LEVEL", BUTTON_X, 225, BUTTON_WIDTH, BUTTON_HEIGHT);
@@ -28,6 +31,10 @@ public class ResultScreen extends BaseScreen
         this.turns = turns;
         this.levelNumber = levelNumber;
         nextButton.enabled = won && levelNumber > 0 && LevelFiles.exists(levelNumber + 1);
+
+        // Endless: ghi điểm ngay khi vào màn kết quả (chỉ 1 lần mỗi ván)
+        newRecord = isEndless() && SaveData.submitEndlessScore(score);
+        highScore = isEndless() ? SaveData.getEndlessHighScore() : 0;
     }
 
     private boolean isEndless()
@@ -38,6 +45,7 @@ public class ResultScreen extends BaseScreen
     @Override
     public void render(float delta)
     {
+        elapsed += delta;
         updateMouse();
         boolean click = clicked();
         if (againButton.isClicked(mouse, click))
@@ -74,6 +82,17 @@ public class ResultScreen extends BaseScreen
         if (won && levelNumber > 0 && !nextButton.enabled)
         {
             drawCentered(uiFont, "THAT WAS THE LAST LEVEL!", 420, DIM_TEXT);
+        }
+        if (isEndless())
+        {
+            if (newRecord && (int) (elapsed * 3) % 2 == 0)
+            {
+                drawCentered(uiFont, "NEW RECORD!", 420, WIN_TEXT);
+            }
+            else if (!newRecord)
+            {
+                drawCentered(uiFont, "BEST " + highScore, 420, DIM_TEXT);
+            }
         }
         againButton.drawLabel(batch, uiFont);
         if (!isEndless())
