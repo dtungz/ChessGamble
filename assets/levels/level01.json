@@ -1,0 +1,11 @@
+{
+  "id": 1,
+  "name": "Làm quen",
+  "playerStart": "e1",
+  "enemiesPerTurn": 1,
+  "enemies": [
+    { "type": "Pawn", "pos": "c7" },
+    { "type": "Pawn", "pos": "e7" },
+    { "type": "Pawn", "pos": "g7" }
+  ]
+}

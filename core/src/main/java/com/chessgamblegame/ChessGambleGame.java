@@ -1,32 +1,26 @@
 package com.chessgamblegame;
 
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.Game;
+import com.chessgamblegame.screen.MainMenuScreen;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
-public class ChessGambleGame extends ApplicationAdapter {
-    private SpriteBatch batch;
-    private Texture image;
+// Điểm khởi đầu của game: giữ màn hình hiện tại, đổi màn bằng setScreen(...).
+public class ChessGambleGame extends Game
+{
+    public static final int WORLD_WIDTH = 1000;
+    public static final int WORLD_HEIGHT = 720;
 
     @Override
-    public void create() {
-        batch = new SpriteBatch();
-        image = new Texture("libgdx.png");
+    public void create()
+    {
+        setScreen(new MainMenuScreen(this));
     }
 
     @Override
-    public void render() {
-        ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
-        batch.begin();
-        batch.draw(image, 140, 210);
-        batch.end();
-    }
-
-    @Override
-    public void dispose() {
-        batch.dispose();
-        image.dispose();
+    public void dispose()
+    {
+        if (getScreen() != null)
+        {
+            getScreen().dispose();
+        }
     }
 }

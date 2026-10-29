@@ -2,6 +2,7 @@ package com.chessgamblegame.model;
 
 import com.chessgamblegame.ai.EnemySelectionStrategy;
 import com.chessgamblegame.ai.PathFinder;
+import com.chessgamblegame.level.EndlessSpawner;
 import com.chessgamblegame.model.enums.PieceType;
 
 import java.util.ArrayList;
@@ -28,20 +29,35 @@ public class TurnManager
 
     private final Board board;
     private final GameConfig cfg;
-    private final int enemiesPerTurn;
     private final Random rnd;
     private final EnemySelectionStrategy strategy;
     private final Dice dice;
+    private final EndlessSpawner endless;   // null = chế độ Level
 
+    private int enemiesPerTurn;
     private Phase phase;
     private int hp;
     private int score;
+    private int healMilestonesReached;      // số mốc hồi máu (mỗi healEveryScore điểm) đã xét
     private int turnNumber;
     private PieceType rolledType;
     private List<Position> validMoves = new ArrayList<>();
     private List<Piece> shakingEnemies = new ArrayList<>();
 
+    // Chế độ Level: thắng khi ăn hết địch.
     public TurnManager(Board board, GameConfig cfg, int enemiesPerTurn, Random rnd, EnemySelectionStrategy strategy)
+    {
+        this(board, cfg, enemiesPerTurn, rnd, strategy, null);
+    }
+
+    // Chế độ Endless: không có thắng, địch sinh thêm theo lượt, có điểm sống sót và hồi máu.
+    public TurnManager(Board board, GameConfig cfg, Random rnd, EnemySelectionStrategy strategy, EndlessSpawner endless)
+    {
+        this(board, cfg, endless.enemiesPerTurn(1), rnd, strategy, endless);
+    }
+
+    private TurnManager(Board board, GameConfig cfg, int enemiesPerTurn, Random rnd,
+                        EnemySelectionStrategy strategy, EndlessSpawner endless)
     {
         if (board.playerPos == null)
         {
@@ -52,6 +68,7 @@ public class TurnManager
         this.enemiesPerTurn = enemiesPerTurn;
         this.rnd = rnd;
         this.strategy = strategy;
+        this.endless = endless;
         this.dice = new Dice(rnd, cfg.diceWeights);
         this.hp = cfg.startHp;
 
@@ -61,6 +78,12 @@ public class TurnManager
     // Đầu lượt người chơi: chọn trước các quân địch sẽ đi ở lượt địch tới và cho chúng rung.
     public void startPlayerTurn()
     {
+        turnNumber++;
+        if (endless != null)
+        {
+            enemiesPerTurn = endless.enemiesPerTurn(turnNumber);
+        }
+
         stopShaking();
         shakingEnemies = new ArrayList<>(strategy.select(board, enemiesPerTurn, rnd));
         for (Piece e : shakingEnemies)
@@ -70,7 +93,6 @@ public class TurnManager
 
         rolledType = null;
         validMoves = new ArrayList<>();
-        turnNumber++;
         phase = Phase.WAIT_ROLL;
     }
 
@@ -110,12 +132,12 @@ public class TurnManager
         {
             board.removeEnemy(captured);
             captured.shaking = false;
-            shakingEnemies.remove(captured);   // quân đang rung bị ăn thì lượt này địch đi ít hơn 1 quân
-            score += cfg.scoreFor(captured.type);
+            shakingEnemies.remove(captured);
             events.add(GameEvent.playerCaptured(captured, target));
+            addScore(cfg.scoreFor(captured.type), events);
         }
 
-        if (board.getEnemies().isEmpty())
+        if (endless == null && board.getEnemies().isEmpty())
         {
             phase = Phase.WON;
             return events;
@@ -125,7 +147,6 @@ public class TurnManager
         return events;
     }
 
-    // Chỉ được bỏ lượt khi đã tung xúc xắc mà không có nước đi hợp lệ.
     public List<GameEvent> skipTurn()
     {
         if (phase != Phase.WAIT_SKIP)
@@ -137,7 +158,6 @@ public class TurnManager
         return events;
     }
 
-    // Lần lượt từng quân đang rung: tìm đường (BFS) rồi đi 1 nước hoặc đánh người chơi.
     private void runEnemyTurn(List<GameEvent> events)
     {
         phase = Phase.ENEMY_TURN;
@@ -174,14 +194,52 @@ public class TurnManager
         }
         shakingEnemies.clear();
 
-        // Quân cuối cùng đánh trúng rồi biến mất mà người chơi vẫn còn máu -> bàn hết địch -> thắng.
-        if (board.getEnemies().isEmpty())
+        if (endless != null)
+        {
+            endOfEndlessTurn(events);
+        }
+        else if (board.getEnemies().isEmpty())
         {
             phase = Phase.WON;
             return;
         }
 
         startPlayerTurn();
+    }
+
+    // Endless: cộng điểm sống sót, rồi sinh quân mới nếu tới mốc (hoặc bàn đã hết địch).
+    private void endOfEndlessTurn(List<GameEvent> events)
+    {
+        addScore(cfg.surviveTurnScore, events);
+        if (endless.shouldSpawn(turnNumber) || board.getEnemies().isEmpty())
+        {
+            Piece spawned = endless.spawn(board, turnNumber, rnd);
+            if (spawned != null)
+            {
+                events.add(GameEvent.enemySpawned(spawned, spawned.pos));
+            }
+        }
+    }
+
+    // Endless: cứ đạt mỗi healEveryScore điểm tích luỹ thì hồi 1 máu.
+    // Đang đầy máu thì mốc đó bị bỏ qua, không để dành.
+    private void addScore(int points, List<GameEvent> events)
+    {
+        score += points;
+        if (endless == null)
+        {
+            return;
+        }
+        int milestones = score / cfg.healEveryScore;
+        while (healMilestonesReached < milestones)
+        {
+            healMilestonesReached++;
+            if (hp < cfg.maxHp)
+            {
+                hp++;
+                events.add(GameEvent.heal(board.playerPos));
+            }
+        }
     }
 
     private void stopShaking()
@@ -200,6 +258,16 @@ public class TurnManager
             e.type = PROMOTION_TYPES[rnd.nextInt(PROMOTION_TYPES.length)];
             events.add(GameEvent.enemyPromoted(e, e.pos, e.type));
         }
+    }
+
+    public boolean isEndless()
+    {
+        return endless != null;
+    }
+
+    public int getEnemiesPerTurn()
+    {
+        return enemiesPerTurn;
     }
 
     public boolean isGameOver()

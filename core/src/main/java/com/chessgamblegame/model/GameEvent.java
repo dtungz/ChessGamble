@@ -16,7 +16,8 @@ public record GameEvent(Kind kind, Position from, Position to, Piece piece, Piec
         PLAYER_HIT,               // quân piece ở from đánh trúng người chơi ở to (mất 1 máu)
         ENEMY_REMOVED_AFTER_HIT,  // quân piece biến mất sau khi đánh trúng
         ENEMY_PROMOTED,           // Tốt piece tại to phong cấp thành newType
-        HEAL                      // người chơi hồi 1 máu (Endless)
+        HEAL,                     // người chơi hồi 1 máu tại to (Endless)
+        ENEMY_SPAWNED             // quân piece mới xuất hiện tại to (Endless)
     }
 
     public static GameEvent playerMoved(Position from, Position to)
@@ -47,5 +48,15 @@ public record GameEvent(Kind kind, Position from, Position to, Piece piece, Piec
     public static GameEvent enemyPromoted(Piece enemy, Position at, PieceType newType)
     {
         return new GameEvent(Kind.ENEMY_PROMOTED, at, at, enemy, newType);
+    }
+
+    public static GameEvent heal(Position playerPos)
+    {
+        return new GameEvent(Kind.HEAL, playerPos, playerPos, null, null);
+    }
+
+    public static GameEvent enemySpawned(Piece enemy, Position at)
+    {
+        return new GameEvent(Kind.ENEMY_SPAWNED, at, at, enemy, null);
     }
 }
