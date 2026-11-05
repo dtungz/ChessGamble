@@ -280,4 +280,35 @@ class EndlessModeTest
         assertArrayEquals(new long[]{0, 0, 1}, spawnedPerTurn);
         assertEquals(3, board.getEnemies().size());
     }
+
+    @Test
+    void higherScoreSpawnsBiggerWaves()
+    {
+        cfg.endlessSpawnEvery = 1;
+        cfg.endlessSpawnCountScoreStep = 10;   // 90 điểm -> đợt sau sinh tối đa 3 quân
+        diceAlways(PieceType.Rook);
+        addEnemy(PieceType.Queen, "a1");
+        addEnemy(PieceType.Pawn, "h8");
+        TurnManager tm = endlessGame();
+        tm.rollDice();
+
+        List<GameEvent> events = tm.playerMoveTo(at("a1"));
+
+        assertEquals(cfg.endlessSpawnCountMax, count(events, Kind.ENEMY_SPAWNED));
+        assertEquals(1 + cfg.endlessSpawnCountMax, board.getEnemies().size());
+    }
+
+    @Test
+    void lowScoreSpawnsSinglePiece()
+    {
+        cfg.endlessSpawnEvery = 1;
+        diceAlways(PieceType.Rook);
+        addEnemy(PieceType.Pawn, "h8");
+        TurnManager tm = endlessGame();
+        tm.rollDice();
+
+        List<GameEvent> events = tm.playerMoveTo(at("e2"));
+
+        assertEquals(1, count(events, Kind.ENEMY_SPAWNED));
+    }
 }

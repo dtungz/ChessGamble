@@ -15,14 +15,6 @@ public class EndlessSpawner
 {
     private static final int TOP_ROW = Board.SIZE - 1;
 
-    // Bậc 0: chỉ Tốt; bậc 1: thêm Mã, Tượng; bậc 2: thêm Xe; bậc 3 trở đi: thêm Hậu.
-    private static final PieceType[][] TIERS = {
-        {PieceType.Pawn},
-        {PieceType.Pawn, PieceType.Knight, PieceType.Bishop},
-        {PieceType.Pawn, PieceType.Knight, PieceType.Bishop, PieceType.Rook},
-        {PieceType.Pawn, PieceType.Knight, PieceType.Bishop, PieceType.Rook, PieceType.Queen}
-    };
-
     private final GameConfig cfg;
 
     public EndlessSpawner(GameConfig cfg)
@@ -30,11 +22,11 @@ public class EndlessSpawner
         this.cfg = cfg;
     }
 
-    // Bàn bắt đầu: người chơi ở e1, vài quân Tốt ngẫu nhiên ở hàng trên cùng.
+    // Bàn bắt đầu: người chơi ở ô endlessPlayerStart, vài quân Tốt ngẫu nhiên ở hàng trên cùng.
     public Board createStartBoard(Random rnd)
     {
         Board board = new Board();
-        board.playerPos = Position.parse("e1");
+        board.playerPos = Position.parse(cfg.endlessPlayerStart);
         for (int i = 0; i < cfg.endlessStartPawns; i++)
         {
             Position p = randomEmptyTopSquare(board, rnd);
@@ -57,11 +49,35 @@ public class EndlessSpawner
         return turn % cfg.endlessSpawnEvery == 0;
     }
 
+    // Số quân sinh ra trong 1 đợt, tăng dần theo điểm hiện có.
+    public int spawnCount(int score)
+    {
+        int n = cfg.endlessSpawnCountStart + Math.max(0, score) / cfg.endlessSpawnCountScoreStep;
+        return Math.min(n, cfg.endlessSpawnCountMax);
+    }
+
     public PieceType typeForTurn(int turn, Random rnd)
     {
-        int tier = Math.min((turn - 1) / cfg.endlessTierEvery, TIERS.length - 1);
-        PieceType[] choices = TIERS[tier];
+        PieceType[][] tiers = cfg.endlessTiers;
+        int tier = Math.min((turn - 1) / cfg.endlessTierEvery, tiers.length - 1);
+        PieceType[] choices = tiers[tier];
         return choices[rnd.nextInt(choices.length)];
+    }
+
+    // Sinh 1 đợt gồm spawnCount(score) quân. Trả về các quân thật sự được đặt (có thể ít hơn nếu hết chỗ).
+    public List<Piece> spawnWave(Board board, int turn, int score, Random rnd)
+    {
+        List<Piece> spawned = new ArrayList<>();
+        for (int i = 0; i < spawnCount(score); i++)
+        {
+            Piece e = spawn(board, turn, rnd);
+            if (e == null)
+            {
+                break;
+            }
+            spawned.add(e);
+        }
+        return spawned;
     }
 
     // Đặt 1 quân mới ở ô trống ngẫu nhiên trên hàng trên cùng. Trả về null nếu hàng đã kín hoặc bàn đã đủ quân.

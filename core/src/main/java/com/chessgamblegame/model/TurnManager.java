@@ -22,11 +22,6 @@ public class TurnManager
         LOST
     }
 
-    // Tốt địch xuống hàng cuối được phong ngẫu nhiên 1 trong các loại này (địch không có Vua).
-    private static final PieceType[] PROMOTION_TYPES = {
-        PieceType.Knight, PieceType.Bishop, PieceType.Rook, PieceType.Queen
-    };
-
     private final Board board;
     private final GameConfig cfg;
     private final Random rnd;
@@ -207,14 +202,14 @@ public class TurnManager
         startPlayerTurn();
     }
 
-    // Endless: cộng điểm sống sót, rồi sinh quân mới nếu tới mốc (hoặc bàn đã hết địch).
+    // Endless: cộng điểm sống sót, rồi sinh 1 đợt quân mới nếu tới mốc (hoặc bàn đã hết địch).
+    // Điểm càng cao, mỗi đợt sinh càng nhiều quân (xem endlessSpawnCount... trong GameConfig).
     private void endOfEndlessTurn(List<GameEvent> events)
     {
         addScore(cfg.surviveTurnScore, events);
         if (endless.shouldSpawn(turnNumber) || board.getEnemies().isEmpty())
         {
-            Piece spawned = endless.spawn(board, turnNumber, rnd);
-            if (spawned != null)
+            for (Piece spawned : endless.spawnWave(board, turnNumber, score, rnd))
             {
                 events.add(GameEvent.enemySpawned(spawned, spawned.pos));
             }
@@ -255,7 +250,7 @@ public class TurnManager
     {
         if (e.type == PieceType.Pawn && e.pos.y() == 0)
         {
-            e.type = PROMOTION_TYPES[rnd.nextInt(PROMOTION_TYPES.length)];
+            e.type = cfg.promotionTypes[rnd.nextInt(cfg.promotionTypes.length)];
             events.add(GameEvent.enemyPromoted(e, e.pos, e.type));
         }
     }

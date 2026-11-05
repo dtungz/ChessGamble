@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.chessgamblegame.model.GameConfig.Display;
 import com.chessgamblegame.model.enums.PieceType;
 import com.chessgamblegame.render.BoardView.Sprite;
 
@@ -23,8 +24,8 @@ public class PieceRenderer
     private static final float RING = 4;
 
     // Rung: lệch qua lại tối đa 1.5px, khoảng 6 lần/giây. Chỉ quân rung, ô cờ đứng yên.
-    private static final float SHAKE_AMPLITUDE = 1.5f;
-    private static final float SHAKE_SPEED = 40f;
+    private static final float SHAKE_AMPLITUDE = Display.SHAKE_AMPLITUDE;
+    private static final float SHAKE_SPEED = Display.SHAKE_SPEED;
 
     private static final Color PLAYER_SHADOW = Palette.withAlpha(Palette.OUTLINE, 0.30f);
     private static final Color UNKNOWN_FILL = Palette.CARD;

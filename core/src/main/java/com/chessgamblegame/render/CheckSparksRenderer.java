@@ -1,14 +1,15 @@
 package com.chessgamblegame.render;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.chessgamblegame.model.GameConfig.Display;
 
 // Cảnh báo "đang bị chiếu": các tia nhỏ toả ra từ đỉnh đầu quân người chơi theo hình vòng cung.
 // Tia bay từ trong ra ngoài qua 5 khung hình (mỗi khung 0.08s), tắt một chút rồi lặp lại.
 public class CheckSparksRenderer
 {
-    private static final int FRAMES = 5;
-    private static final float FRAME_TIME = 0.08f;
-    private static final float PAUSE_TIME = 0.25f;
+    private static final int FRAMES = Display.CHECK_SPARK_FRAMES;
+    private static final float FRAME_TIME = Display.CHECK_SPARK_FRAME_TIME;
+    private static final float PAUSE_TIME = Display.CHECK_SPARK_PAUSE;
     private static final float CYCLE = FRAMES * FRAME_TIME + PAUSE_TIME;
 
     // 5 tia trên vòng cung phía trên đầu (độ, 90 = thẳng lên trên)

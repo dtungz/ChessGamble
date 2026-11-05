@@ -17,6 +17,7 @@ import com.chessgamblegame.level.LevelData;
 import com.chessgamblegame.level.LevelLoader;
 import com.chessgamblegame.model.Board;
 import com.chessgamblegame.model.GameConfig;
+import com.chessgamblegame.model.GameConfig.Display;
 import com.chessgamblegame.model.GameEvent;
 import com.chessgamblegame.model.Piece;
 import com.chessgamblegame.model.Position;
@@ -43,7 +44,6 @@ import java.util.Random;
 public class GameScreen extends BaseScreen
 {
     private static final float SIDE_WIDTH = 164;
-    // Cột xúc xắc ở bên phải (thuận tay phải), cột thông tin NEXT MOVE ở bên trái
     private static final float INFO_X = 24;
     private static final float DICE_X = BoardRenderer.BOARD_X + BoardRenderer.BOARD_SIZE + 24;
     private static final float BOARD_RIGHT = BoardRenderer.BOARD_X + BoardRenderer.BOARD_SIZE;
@@ -57,15 +57,15 @@ public class GameScreen extends BaseScreen
     private static final float CARD_PIECE = 64;
 
     // Hết ván thì đợi 1 giây cho người chơi nhìn bàn cờ rồi mới sang màn kết quả
-    private static final float RESULT_DELAY = 1.0f;
+    private static final float RESULT_DELAY = Display.RESULT_DELAY;
 
     // Bị đánh: quân người chơi chớp tắt/hiện trong 0.5s (mỗi 0.08s) và màn hình rung nhẹ tối đa 4px.
     // Không nháy đỏ cả màn hình cho đỡ chói mắt.
-    private static final float HIT_FLASH_TIME = 0.5f;
-    private static final float HIT_BLINK_EVERY = 0.08f;
-    private static final float HIT_SHAKE_PX = 4f;
+    private static final float HIT_FLASH_TIME = Display.HIT_TIME;
+    private static final float HIT_BLINK_EVERY = Display.HIT_BLINK_EVERY;
+    private static final float HIT_SHAKE_PX = Display.HIT_SHAKE_PX;
 
-    private final BitmapFont tinyFont = createFont(8);
+    private final BitmapFont tinyFont = createFont(Display.FONT_TINY);
     private final GlyphLayout layout = new GlyphLayout();
 
     private final BoardRenderer boardRenderer = new BoardRenderer();

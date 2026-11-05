@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.chessgamblegame.ChessGambleGame;
+import com.chessgamblegame.model.GameConfig.Display;
 import com.chessgamblegame.render.Palette;
 
 // Phần chung của mọi màn hình: camera, viewport, bút vẽ, font, vị trí chuột.
@@ -28,16 +29,16 @@ public abstract class BaseScreen extends ScreenAdapter
     protected static final Color WIN_TEXT = Palette.WIN;
     protected static final Color LOSE_TEXT = Palette.ACCENT;
 
-    private static final String PIXEL_FONT = "fonts/PressStart2P-Regular.ttf";
+    private static final String PIXEL_FONT = Display.FONT_FILE;
 
     protected final ChessGambleGame game;
     protected final OrthographicCamera camera = new OrthographicCamera();
     protected final Viewport viewport = new FitViewport(ChessGambleGame.WORLD_WIDTH, ChessGambleGame.WORLD_HEIGHT, camera);
     protected final ShapeRenderer shapes = new ShapeRenderer();
     protected final SpriteBatch batch = new SpriteBatch();
-    protected final BitmapFont smallFont = createFont(12);
-    protected final BitmapFont uiFont = createFont(16);
-    protected final BitmapFont titleFont = createFont(32);
+    protected final BitmapFont smallFont = createFont(Display.FONT_SMALL);
+    protected final BitmapFont uiFont = createFont(Display.FONT_UI);
+    protected final BitmapFont titleFont = createFont(Display.FONT_TITLE);
     protected final Vector2 mouse = new Vector2();   // vị trí chuột trong toạ độ game
 
     private final GlyphLayout layout = new GlyphLayout();

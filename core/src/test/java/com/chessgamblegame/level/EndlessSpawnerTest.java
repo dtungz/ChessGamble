@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -170,5 +171,74 @@ class EndlessSpawnerTest
         assertNotNull(spawner.spawn(board, 1, rnd));
         assertNotNull(spawner.spawn(board, 1, rnd));
         assertNull(spawner.spawn(board, 1, rnd));
+    }
+
+    // Số quân mỗi đợt tăng theo điểm
+
+    @Test
+    void spawnCountGrowsWithScoreUpToMax()
+    {
+        // Tự đặt thông số để test không hỏng khi chỉnh GameConfig
+        cfg.endlessSpawnCountStart = 1;
+        cfg.endlessSpawnCountScoreStep = 100;
+        cfg.endlessSpawnCountMax = 3;
+
+        assertEquals(1, spawner.spawnCount(0));
+        assertEquals(1, spawner.spawnCount(99));
+        assertEquals(2, spawner.spawnCount(100));
+        assertEquals(2, spawner.spawnCount(199));
+        assertEquals(3, spawner.spawnCount(200));
+        assertEquals(3, spawner.spawnCount(5000));
+    }
+
+    @Test
+    void spawnCountSettingsComeFromConfig()
+    {
+        cfg.endlessSpawnCountStart = 2;
+        cfg.endlessSpawnCountScoreStep = 50;
+        cfg.endlessSpawnCountMax = 5;
+
+        assertEquals(2, spawner.spawnCount(0));
+        assertEquals(4, spawner.spawnCount(100));
+        assertEquals(5, spawner.spawnCount(1000));
+    }
+
+    @Test
+    void waveSpawnsAsManyPiecesAsScoreAllows()
+    {
+        cfg.endlessSpawnCountStart = 1;
+        cfg.endlessSpawnCountScoreStep = 100;
+        cfg.endlessSpawnCountMax = 3;
+        Board board = new Board();
+        board.playerPos = Position.parse("e1");
+
+        List<Piece> wave = spawner.spawnWave(board, 1, 250, new Random(0));
+
+        assertEquals(3, wave.size());
+        assertEquals(3, board.getEnemies().size());
+        assertEquals(3, new HashSet<>(wave.stream().map(p -> p.pos).toList()).size());
+    }
+
+    @Test
+    void waveStopsWhenTopRowIsFull()
+    {
+        Board board = new Board();
+        board.playerPos = Position.parse("e1");
+        for (int x = 0; x < Board.SIZE - 1; x++)
+        {
+            board.addEnemy(new Piece(PieceType.Pawn, new Position(x, 7)));
+        }
+
+        List<Piece> wave = spawner.spawnWave(board, 1, 1000, new Random(0));
+
+        assertEquals(1, wave.size());
+    }
+
+    @Test
+    void customTiersFromConfigAreUsed()
+    {
+        cfg.endlessTiers = new PieceType[][]{{PieceType.Queen}};
+
+        assertEquals(EnumSet.of(PieceType.Queen), typesSeenAtTurn(1));
     }
 }

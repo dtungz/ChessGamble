@@ -1,6 +1,7 @@
 package com.chessgamblegame.render;
 
 import com.chessgamblegame.model.Board;
+import com.chessgamblegame.model.GameConfig.Display;
 import com.chessgamblegame.model.GameEvent;
 import com.chessgamblegame.model.Piece;
 import com.chessgamblegame.model.Position;
@@ -19,10 +20,10 @@ import java.util.function.Consumer;
 // Khi không có animation, BoardView được đồng bộ lại đúng y như Board thật.
 public class BoardView
 {
-    private static final float SPEED = 12f;          // càng lớn quân trượt càng nhanh
-    private static final float MAX_MOVE_TIME = 0.35f;
-    private static final float SHORT_PAUSE = 0.05f;
-    private static final float LONG_PAUSE = 0.25f;
+    private static final float SPEED = Display.PIECE_MOVE_SPEED;
+    private static final float MAX_MOVE_TIME = Display.PIECE_MAX_MOVE_TIME;
+    private static final float SHORT_PAUSE = Display.EVENT_SHORT_PAUSE;
+    private static final float LONG_PAUSE = Display.EVENT_LONG_PAUSE;
 
     public static class Sprite
     {

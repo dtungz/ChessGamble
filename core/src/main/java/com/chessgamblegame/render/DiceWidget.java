@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.chessgamblegame.model.GameConfig.Display;
 import com.chessgamblegame.model.enums.PieceType;
 
 import java.util.Random;
@@ -14,8 +15,8 @@ import java.util.Random;
 // widget chỉ đổi mặt ngẫu nhiên vài lần cho có cảm giác "lăn" rồi dừng ở kết quả đó.
 public class DiceWidget
 {
-    private static final float ROLL_TIME = 0.8f;
-    private static final float FACE_CHANGE_EVERY = 0.08f;
+    private static final float ROLL_TIME = Display.DICE_ROLL_TIME;
+    private static final float FACE_CHANGE_EVERY = Display.DICE_FACE_CHANGE_EVERY;
 
     private static final float FRAME = 4;
     private static final float FACE_SIZE = 96;   // ảnh 16px phóng x6
